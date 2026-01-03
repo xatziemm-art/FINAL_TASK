@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Τελική Δοκιμασία</title>
+
+<style>
+body{
+  background:#0a0a0a;
+  color:#ffffff;
+  font-family:Arial;
+  text-align:center;
+  padding:20px;
+  min-height:100vh;
+}
+
+input{
+  padding:12px;
+  font-size:18px;
+  margin:10px;
+  border:2px solid #ffffff;
+  border-radius:8px;
+  background:#111;
+  color:#fff;
+  width:260px;
+  max-width:90%;
+  text-align:center;
+}
+
+button{
+  padding:12px 20px;
+  font-size:18px;
+  margin:10px;
+  cursor:pointer;
+}
+
+img{
+  max-width:90%;
+  border:3px solid #fff;
+  border-radius:12px;
+  margin-top:20px;
+}
+
+.hidden{display:none;}
+
+/* 🏆 Κύπελλο */
+.trophy{
+  font-size:100px;
+  margin-top:20px;
+  animation:pulse 1.5s infinite, glow 2s infinite;
+}
+
+@keyframes pulse{
+  0%{transform:scale(1);}
+  50%{transform:scale(1.15);}
+  100%{transform:scale(1);}
+}
+
+@keyframes glow{
+  0%{text-shadow:0 0 10px gold;}
+  50%{text-shadow:0 0 30px gold;}
+  100%{text-shadow:0 0 10px gold;}
+}
+
+/* 🎉 Confetti */
+.confetti{
+  position:fixed;
+  width:10px;
+  height:10px;
+  top:-10px;
+  animation:fall linear forwards;
+}
+
+@keyframes fall{
+  to{
+    transform:translateY(110vh) rotate(360deg);
+    opacity:0;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h2>Εισαγωγή Κωδικού</h2>
+<input id="startCode" placeholder="Πληκτρολόγησε τον κωδικό">
+<br>
+<button onclick="start()">Συνέχεια</button>
+
+<div id="game" class="hidden">
+  <img id="photo">
+  <br>
+  <input id="answer" placeholder="Ποια στάση ήταν;"
+         onfocus="this.scrollIntoView({behavior:'smooth', block:'center'})">
+  <br>
+  <button onclick="next()">Υποβολή</button>
+</div>
+
+<div id="win" class="hidden">
+  <div class="trophy">🏆</div>
+  <h2>ΣΥΓΧΑΡΗΤΗΡΙΑ!!!! ΝΙΚΗΣΕΣ!!!!</h2>
+  <h3 id="winner"></h3>
+</div>
+
+<audio id="sound" src="win.mp3"></audio>
+
+<script>
+const START_CODE = "161311316";
+
+/* Αντίστροφη σειρά – ΧΩΡΙΣ τη στάση 7 */
+const photos = [
+  {file:"s6.jpg", station:6},
+  {file:"s5.jpg", station:5},
+  {file:"s4.jpg", station:4},
+  {file:"s3.jpg", station:3},
+  {file:"s2.jpg", station:2},
+  {file:"s1.jpg", station:1}
+];
+
+let index = 0;
+
+function start(){
+  if(document.getElementById("startCode").value !== START_CODE){
+    alert("Λάθος κωδικός");
+    return;
+  }
+  document.getElementById("game").classList.remove("hidden");
+  loadPhoto();
+
+  setTimeout(()=>{
+    document.getElementById("answer").focus();
+  },300);
+}
+
+function loadPhoto(){
+  document.getElementById("photo").src = photos[index].file;
+}
+
+function next(){
+  const answerInput = document.getElementById("answer");
+  const userAnswer = parseInt(answerInput.value);
+
+  if(userAnswer !== photos[index].station){
+    alert("Λάθος απάντηση. Το παιχνίδι ολοκληρώθηκε.");
+    location.reload();
+    return;
+  }
+
+  answerInput.value = "";
+  index++;
+
+  if(index < photos.length){
+    loadPhoto();
+    setTimeout(()=>{
+      answerInput.focus();
+      answerInput.scrollIntoView({behavior:'smooth', block:'center'});
+    },200);
+  } else {
+    finish();
+  }
+}
+
+function finish(){
+  document.getElementById("game").classList.add("hidden");
+
+  const sound = document.getElementById("sound");
+  sound.currentTime = 0;
+  sound.play();
+
+  const name = prompt("Δώσε το όνομά σου");
+  document.getElementById("winner").innerText = name;
+  document.getElementById("win").classList.remove("hidden");
+
+  launchConfetti();
+}
+
+function launchConfetti(){
+  for(let i=0;i<120;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random()*100 + "vw";
+    c.style.background = ["gold","white","orange","yellow"][Math.floor(Math.random()*4)];
+    c.style.animationDuration = (Math.random()*2+2)+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),4000);
+  }
+}
+</script>
+
+</body>
+</html>
